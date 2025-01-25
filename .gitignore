@@ -1,0 +1,6 @@
+
+/.vs
+/CheckoutProcessor.Tests/bin
+/CheckoutProcessor.Tests/obj
+/CheckoutProcessor/bin
+/CheckoutProcessor/obj
