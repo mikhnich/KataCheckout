@@ -4,19 +4,43 @@ namespace CheckoutProcessor
 {
     public class Checkout : ICheckout
     {
+        private Dictionary<char, SkuAggregationInfo> _skuList;
+        private int? _lastTotalPrice = null;
+
         public Checkout(PricingRule[] pricingRules)
         {
+            _skuList = pricingRules.ToDictionary(r => r.SKU, r => new SkuAggregationInfo(r));
+        }
 
+        public void Scan(string skuList)
+        {
+            foreach (var sku in skuList)
+            {
+                if (_skuList.TryGetValue(sku, out var skuAggregationInfo))
+                {
+                    skuAggregationInfo.Increment();
+                }
+                else
+                {
+                    throw new KeyNotFoundException($"Unknown SKU: {sku}");
+                }
+
+                _lastTotalPrice = null;
+            }
         }
 
         public int GetTotalPrice()
         {
-            throw new NotImplementedException();
+            if (_lastTotalPrice == null)
+            {
+                _lastTotalPrice = CalcTotalPrice(_skuList.Values.ToArray());
+            }
+            return _lastTotalPrice.Value;
         }
 
-        public void Scan(string item)
+        private int CalcTotalPrice(SkuAggregationInfo[] scanInfos)
         {
-            throw new NotImplementedException();
+            return scanInfos.Sum(x => x.GetTotalAmount());
         }
     }
 }
